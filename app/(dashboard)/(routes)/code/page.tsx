@@ -84,17 +84,25 @@ const CodeGenerationPage = () => {
 
       setMessages((current) => [...current, userMessage, response.data]);
       form.reset();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        description: "Something went wrong. Please try again.",
-      });
-      if (error?.response?.status === 403) {
-        proModal.onOpen();
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) {
+          proModal.onOpen();
+        } else {
+          toast({
+            variant: "destructive",
+            description: error.response?.data?.message || "Something went wrong.",
+          });
+        }
       } else {
-        hottoast.error("something went wrong");
+        toast({
+          variant: "destructive",
+          description: "An unexpected error occurred. Please try again.",
+        });
       }
-    } finally {
+      hottoast.error("Something went wrong");
+    }
+     finally {
       router.refresh();
     }
   };

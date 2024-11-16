@@ -50,18 +50,20 @@ const ImagePage = () => {
       setImages(urls);
 
       form.reset();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error?.response?.data || "Something went wrong",
-      });
-      if (error?.response?.status === 403) {
-        proModal.onOpen();
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) {
+          proModal.onOpen();
+        } else {
+          hottoast.error(
+            error.response?.data?.message || "Something went wrong. Please try again."
+          );
+        }
       } else {
-        hottoast.error("something went wrong...");
+        hottoast.error("An unexpected error occurred.");
       }
-    } finally {
+    }
+     finally {
       router.refresh();
     }
   };
@@ -78,13 +80,23 @@ const ImagePage = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Download Failed",
-        description: "Failed to download image. Please try again.",
-      });
-      if (error?.response?.status === 403) {
+    } catch (error: unknown) { // Use `unknown` instead of `any`
+      if (error instanceof Error) { // Narrow down to Error type
+        toast({
+          variant: "destructive",
+          title: "Download Failed",
+          description: error.message || "Failed to download image. Please try again.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Download Failed",
+          description: "An unexpected error occurred.",
+        });
+      }
+  
+      // Check if it's an Axios error
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
         proModal.onOpen();
       }
     }

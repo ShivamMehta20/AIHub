@@ -19,6 +19,8 @@ try {
     window.location.href= response.data.url;
 
 } catch (error) {
+    console.log(error);
+    
 toast.error("someting went wrong")
 }finally{
     setLoading(false)

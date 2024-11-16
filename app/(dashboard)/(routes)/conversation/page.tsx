@@ -51,11 +51,18 @@ const ConversationPage = () => {
 
       setMessages((current) => [...current, userMessage, response.data]);
       form.reset();
-    } catch (error: any) {
-      if (error?.response?.status === 403) {
-        proModal.onOpen();
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) {
+          proModal.onOpen();
+        } else {
+          toast.error(
+            error.response?.data?.message ||
+              "Something went wrong. Please try again."
+          );
+        }
       } else {
-        toast.error("something went wrong..");
+        toast.error("An unexpected error occurred.");
       }
     } finally {
       router.refresh();
